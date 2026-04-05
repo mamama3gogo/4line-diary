@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4行日記</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Kaisei+Decol:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FFF9F2;
+    --warm-white: #FFFDF9;
+    --peach: #FFB89A;
+    --peach-light: #FFD9C8;
+    --peach-pale: #FFF0E8;
+    --sage: #8BAF8E;
+    --sage-light: #C4DABD;
+    --sage-pale: #EEF5EC;
+    --gold: #D4A843;
+    --gold-light: #F0D898;
+    --gold-pale: #FBF3DC;
+    --blue: #7AAFC8;
+    --blue-light: #B5D5E6;
+    --blue-pale: #E8F3F9;
+    --text-dark: #3D2B1F;
+    --text-mid: #6B4F3A;
+    --text-light: #9C7B6A;
+    --shadow: rgba(180, 130, 100, 0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    background-color: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    background-image: 
+      radial-gradient(circle at 20% 20%, rgba(255,184,154,0.12) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(139,175,142,0.10) 0%, transparent 50%),
+      radial-gradient(circle at 60% 10%, rgba(212,168,67,0.08) 0%, transparent 40%);
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ===== HEADER ===== */
+  .app-header {
+    text-align: center;
+    padding: 32px 20px 20px;
+    position: relative;
+  }
+
+  .app-title {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 28px;
+    color: var(--text-dark);
+    letter-spacing: 0.08em;
+    position: relative;
+    display: inline-block;
+  }
+
+  .app-title::after {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg, var(--peach), var(--gold), var(--sage));
+    border-radius: 2px;
+    margin-top: 6px;
+  }
+
+  .app-subtitle {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 6px;
+    letter-spacing: 0.15em;
+  }
+
+  /* ===== HOME SCREEN ===== */
+  .home-content {
+    flex: 1;
+    padding: 16px 20px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .date-display {
+    text-align: center;
+    background: var(--warm-white);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  .date-today {
+    font-size: 13px;
+    color: var(--text-light);
+    letter-spacing: 0.1em;
+  }
+
+  .date-big {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 22px;
+    color: var(--text-dark);
+    margin-top: 4px;
+  }
+
+  /* Streak */
+  .streak-section {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: var(--warm-white);
+    border-radius: 20px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  .streak-flame {
+    font-size: 36px;
+    line-height: 1;
+    animation: flicker 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes flicker {
+    from { transform: scale(1) rotate(-3deg); }
+    to { transform: scale(1.05) rotate(3deg); }
+  }
+
+  .streak-info { flex: 1; }
+  .streak-count {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 28px;
+    color: var(--peach);
+    line-height: 1;
+  }
+
+  .streak-count span { font-size: 14px; color: var(--text-mid); margin-left: 4px; }
+  .streak-label { font-size: 11px; color: var(--text-light); margin-top: 2px; letter-spacing: 0.05em; }
+
+  .streak-message {
+    font-size: 12px;
+    color: var(--text-mid);
+    background: var(--peach-pale);
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+
+  /* Today's card */
+  .today-card {
+    background: var(--warm-white);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: 0 6px 24px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .today-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--peach), var(--gold-light), var(--sage-light));
+  }
+
+  .today-card-title {
+    font-size: 13px;
+    color: var(--text-light);
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+
+  .today-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .preview-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .preview-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .preview-icon.jijitsu { background: var(--peach-pale); }
+  .preview-icon.hakken { background: var(--gold-pale); }
+  .preview-icon.kyokun { background: var(--sage-pale); }
+  .preview-icon.sengen { background: var(--blue-pale); }
+
+  .preview-text {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.5;
+    flex: 1;
+    border-bottom: 1px dashed rgba(180,130,100,0.2);
+    padding-bottom: 8px;
+    min-height: 28px;
+  }
+
+  .preview-row:last-child .preview-text { border-bottom: none; padding-bottom: 0; }
+  .preview-text.empty { color: var(--text-light); font-size: 12px; font-style: italic; }
+
+  .write-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--peach) 0%, #FF9470 100%);
+    color: white;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255,148,112,0.4);
+    transition: all 0.2s;
+  }
+
+  .write-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,148,112,0.5); }
+  .write-btn:active { transform: translateY(0); }
+
+  /* History */
+  .history-section {
+    background: var(--warm-white);
+    border-radius: 20px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  .section-title {
+    font-size: 13px;
+    color: var(--text-light);
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--cream);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .history-item:hover { background: var(--peach-pale); }
+
+  .history-date { font-size: 11px; color: var(--text-light); width: 64px; flex-shrink: 0; }
+  .history-snippet { font-size: 12px; color: var(--text-mid); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-dots { display: flex; gap: 3px; }
+  .history-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-1 { background: var(--peach); }
+  .dot-2 { background: var(--gold); }
+  .dot-3 { background: var(--sage); }
+  .dot-4 { background: var(--blue); }
+
+  /* ===== WRITE SCREEN ===== */
+  .write-header {
+    display: flex;
+    align-items: center;
+    padding: 20px 20px 12px;
+    gap: 12px;
+  }
+
+  .back-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--warm-white);
+    color: var(--text-mid);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: all 0.2s;
+  }
+
+  .back-btn:hover { background: var(--peach-pale); }
+
+  .write-title {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 18px;
+    color: var(--text-dark);
+  }
+
+  .write-date { font-size: 11px; color: var(--text-light); margin-left: auto; }
+
+  /* Steps */
+  .steps-container {
+    flex: 1;
+    padding: 8px 20px 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .step-card {
+    background: var(--warm-white);
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 4px 16px var(--shadow);
+    position: relative;
+    transition: all 0.3s;
+  }
+
+  .step-card.active-step { box-shadow: 0 8px 28px var(--shadow); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .step-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .badge-jijitsu { background: var(--peach-pale); }
+  .badge-hakken { background: var(--gold-pale); }
+  .badge-kyokun { background: var(--sage-pale); }
+  .badge-sengen { background: var(--blue-pale); }
+
+  .step-label-wrap { flex: 1; }
+
+  .step-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+
+  .step-sublabel { font-size: 11px; color: var(--text-light); margin-top: 1px; }
+
+  .step-hint-toggle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--peach-light);
+    background: transparent;
+    color: var(--peach);
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .step-hint-toggle:hover { background: var(--peach-pale); }
+
+  .step-hint {
+    font-size: 11.5px;
+    color: var(--text-light);
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    line-height: 1.7;
+    display: none;
+  }
+
+  .step-hint.visible { display: block; animation: fadeIn 0.2s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .step-input {
+    width: 100%;
+    border: 1.5px solid rgba(180,130,100,0.15);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 14px;
+    color: var(--text-dark);
+    background: var(--cream);
+    resize: none;
+    min-height: 70px;
+    line-height: 1.7;
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  .step-input:focus {
+    border-color: var(--peach);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(255,184,154,0.2);
+  }
+
+  .step-input.jijitsu-input:focus { border-color: var(--peach); box-shadow: 0 0 0 3px rgba(255,184,154,0.2); }
+  .step-input.hakken-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,168,67,0.2); }
+  .step-input.kyokun-input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(139,175,142,0.2); }
+  .step-input.sengen-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(122,175,200,0.2); }
+
+  .char-count { text-align: right; font-size: 10px; color: var(--text-light); margin-top: 4px; }
+  .char-count.over { color: var(--peach); }
+
+  /* Connector */
+  .step-connector {
+    display: flex;
+    justify-content: center;
+    margin: -4px 0;
+    color: var(--peach-light);
+    font-size: 18px;
+  }
+
+  /* Save button */
+  .save-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 16px 20px 28px;
+    background: linear-gradient(transparent, var(--cream) 30%);
+  }
+
+  .save-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--sage) 0%, #5E9462 100%);
+    color: white;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(139,175,142,0.5);
+    transition: all 0.2s;
+  }
+
+  .save-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(139,175,142,0.6); }
+  .save-btn:active { transform: translateY(0); }
+
+  /* ===== VIEW SCREEN ===== */
+  .view-content {
+    flex: 1;
+    padding: 8px 20px 40px;
+  }
+
+  .view-card {
+    background: var(--warm-white);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 6px 24px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .view-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--peach), var(--gold), var(--sage), var(--blue));
+  }
+
+  .view-section { margin-bottom: 20px; }
+  .view-section:last-child { margin-bottom: 0; }
+
+  .view-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .view-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .view-section-name { font-size: 12px; font-weight: 700; color: var(--text-light); letter-spacing: 0.08em; }
+  .view-text { font-size: 14px; color: var(--text-dark); line-height: 1.8; padding-left: 36px; }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%; transform: translateX(-50%);
+    background: var(--text-dark);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; }
+
+  /* ===== CELEBRATION ===== */
+  .celebration {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,249,242,0.95);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+
+  .celebration.show { opacity: 1; pointer-events: all; }
+  .celebration-emoji { font-size: 72px; animation: bounce 0.6s ease-in-out infinite alternate; }
+  @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1) translateY(-8px); } }
+  .celebration-title { font-family: 'Kaisei Decol', serif; font-size: 26px; color: var(--text-dark); margin-top: 16px; }
+  .celebration-sub { font-size: 14px; color: var(--text-light); margin-top: 8px; }
+  .celebration-btn {
+    margin-top: 28px;
+    padding: 13px 36px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--peach), var(--gold));
+    color: white;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ===== NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255,253,249,0.95);
+    backdrop-filter: blur(12px);
+    padding: 10px 20px 20px;
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid rgba(180,130,100,0.1);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 16px;
+    border-radius: 14px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Zen Maru Gothic', sans-serif;
+  }
+
+  .nav-item.active { background: var(--peach-pale); }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 9px; color: var(--text-light); letter-spacing: 0.05em; }
+  .nav-item.active .nav-label { color: var(--peach); }
+
+  .pb-nav { padding-bottom: 80px; }
+
+  /* Scrollable */
+  .scroll-content { overflow-y: auto; }
+</style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div class="screen active" id="screen-home">
+  <div class="app-header">
+    <div class="app-title">4行日記</div>
+    <div class="app-subtitle">じぶんを知る、まいにちの習慣</div>
+  </div>
+  <div class="home-content scroll-content pb-nav">
+    <div class="date-display">
+      <div class="date-today">TODAY</div>
+      <div class="date-big" id="home-date"></div>
+    </div>
+
+    <div class="streak-section">
+      <div class="streak-flame">🔥</div>
+      <div class="streak-info">
+        <div class="streak-count"><span id="streak-num">0</span><span>日連続</span></div>
+        <div class="streak-label">継続中のストリーク</div>
+      </div>
+      <div class="streak-message" id="streak-msg">今日も書こう！</div>
+    </div>
+
+    <div class="today-card">
+      <div class="today-card-title">📝 今日の記録</div>
+      <div class="today-preview" id="today-preview">
+        <div class="preview-row">
+          <div class="preview-icon jijitsu">■</div>
+          <div class="preview-text empty" id="prev-jijitsu">まだ書いていません</div>
+        </div>
+        <div class="preview-row">
+          <div class="preview-icon hakken">◆</div>
+          <div class="preview-text empty" id="prev-hakken">まだ書いていません</div>
+        </div>
+        <div class="preview-row">
+          <div class="preview-icon kyokun">●</div>
+          <div class="preview-text empty" id="prev-kyokun">まだ書いていません</div>
+        </div>
+        <div class="preview-row">
+          <div class="preview-icon sengen">★</div>
+          <div class="preview-text empty" id="prev-sengen">まだ書いていません</div>
+        </div>
+      </div>
+      <button class="write-btn" onclick="goWrite()" id="write-btn-home">✏️ 今日の日記を書く</button>
+    </div>
+
+    <div class="history-section">
+      <div class="section-title">📚 これまでの記録</div>
+      <div class="history-list" id="history-list">
+        <div style="font-size:12px;color:var(--text-light);text-align:center;padding:16px 0;">まだ記録がありません</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WRITE SCREEN -->
+<div class="screen" id="screen-write">
+  <div class="write-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="write-title">今日の4行日記</div>
+    <div class="write-date" id="write-date"></div>
+  </div>
+  <div class="steps-container scroll-content pb-nav" style="padding-bottom: 100px;">
+
+    <!-- 事実 -->
+    <div class="step-card" id="card-jijitsu">
+      <div class="step-header">
+        <div class="step-badge badge-jijitsu">■</div>
+        <div class="step-label-wrap">
+          <div class="step-label" style="color:#D4724A;">事実</div>
+          <div class="step-sublabel">今日起きたことの核心</div>
+        </div>
+        <button class="step-hint-toggle" onclick="toggleHint('hint-jijitsu', this)">?</button>
+      </div>
+      <div class="step-hint" id="hint-jijitsu">
+        💡 身の回りで体験・見聞きしたことの「核心」を、自分の意見や解釈を交えずに、できるだけ短く書きましょう。<br>
+        例：「林檎の木から実が落ちるのを観た」
+      </div>
+      <textarea class="step-input jijitsu-input" id="input-jijitsu" placeholder="今日の出来事を一つ、客観的に…" rows="2" oninput="updateChar(this, 'count-jijitsu', 20)"></textarea>
+      <div class="char-count" id="count-jijitsu">0 / 20字</div>
+    </div>
+
+    <div class="step-connector">↓</div>
+
+    <!-- 発見 -->
+    <div class="step-card" id="card-hakken">
+      <div class="step-header">
+        <div class="step-badge badge-hakken">◆</div>
+        <div class="step-label-wrap">
+          <div class="step-label" style="color:#B8892A;">発見（気づき）</div>
+          <div class="step-sublabel">事実から見えた原理・真因</div>
+        </div>
+        <button class="step-hint-toggle" onclick="toggleHint('hint-hakken', this)">?</button>
+      </div>
+      <div class="step-hint" id="hint-hakken">
+        💡 事実から「発見」したこと（気づいたこと）を書きます。事実の背景にある法則性や原理原則、または真因や仮説、解決策など「あっ」と閃くような気付きを書きます。<br>
+        例：「全ての物は落ちる。即ち地には引く力がある」
+      </div>
+      <textarea class="step-input hakken-input" id="input-hakken" placeholder="事実から気づいたこと、発見したこと…" rows="2" oninput="updateChar(this, 'count-hakken', 20)"></textarea>
+      <div class="char-count" id="count-hakken">0 / 20字</div>
+    </div>
+
+    <div class="step-connector">↓</div>
+
+    <!-- 教訓 -->
+    <div class="step-card" id="card-kyokun">
+      <div class="step-header">
+        <div class="step-badge badge-kyokun">●</div>
+        <div class="step-label-wrap">
+          <div class="step-label" style="color:#5E9462;">教訓</div>
+          <div class="step-sublabel">発見を普遍的な知恵に</div>
+        </div>
+        <button class="step-hint-toggle" onclick="toggleHint('hint-kyokun', this)">?</button>
+      </div>
+      <div class="step-hint" id="hint-kyokun">
+        💡 「発見したこと」を普遍的な知恵にして書きます。先人の格言・諺も活用OK。自分だけの発見を全ての人が共有できるように一般論化させます。<br>
+        例：「全ての物は引き合いつつ大に引寄せられる」
+      </div>
+      <textarea class="step-input kyokun-input" id="input-kyokun" placeholder="みんなに当てはまる教訓・原則として…" rows="2" oninput="updateChar(this, 'count-kyokun', 20)"></textarea>
+      <div class="char-count" id="count-kyokun">0 / 20字</div>
+    </div>
+
+    <div class="step-connector">↓</div>
+
+    <!-- 宣言 -->
+    <div class="step-card" id="card-sengen">
+      <div class="step-header">
+        <div class="step-badge badge-sengen">★</div>
+        <div class="step-label-wrap">
+          <div class="step-label" style="color:#4A90B8;">宣言</div>
+          <div class="step-sublabel">「〜している」形で自分を宣言</div>
+        </div>
+        <button class="step-hint-toggle" onclick="toggleHint('hint-sengen', this)">?</button>
+      </div>
+      <div class="step-hint" id="hint-sengen">
+        💡 目標に向かって課題解決できている姿及び、より拡大している自分を「〜している」という形で書き、日々の行動原則という形で宣言します。<br>
+        例：「私は、全ての現象を研究素材としている研究者です」
+      </div>
+      <textarea class="step-input sengen-input" id="input-sengen" placeholder="私は、〜している…" rows="2" oninput="updateChar(this, 'count-sengen', 20)"></textarea>
+      <div class="char-count" id="count-sengen">0 / 20字</div>
+    </div>
+
+  </div>
+  <div class="save-bar">
+    <button class="save-btn" onclick="saveDiary()">✨ 今日の日記を保存する</button>
+  </div>
+</div>
+
+<!-- VIEW SCREEN -->
+<div class="screen" id="screen-view">
+  <div class="write-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="write-title" id="view-date-title">日記の記録</div>
+  </div>
+  <div class="view-content scroll-content pb-nav">
+    <div class="view-card">
+      <div class="view-section">
+        <div class="view-section-header">
+          <div class="view-icon" style="background:var(--peach-pale);">■</div>
+          <div class="view-section-name" style="color:var(--peach);">事実</div>
+        </div>
+        <div class="view-text" id="view-jijitsu"></div>
+      </div>
+      <div class="view-section">
+        <div class="view-section-header">
+          <div class="view-icon" style="background:var(--gold-pale);">◆</div>
+          <div class="view-section-name" style="color:var(--gold);">発見（気づき）</div>
+        </div>
+        <div class="view-text" id="view-hakken"></div>
+      </div>
+      <div class="view-section">
+        <div class="view-section-header">
+          <div class="view-icon" style="background:var(--sage-pale);">●</div>
+          <div class="view-section-name" style="color:var(--sage);">教訓</div>
+        </div>
+        <div class="view-text" id="view-kyokun"></div>
+      </div>
+      <div class="view-section">
+        <div class="view-section-header">
+          <div class="view-icon" style="background:var(--blue-pale);">★</div>
+          <div class="view-section-name" style="color:var(--blue);">宣言</div>
+        </div>
+        <div class="view-text" id="view-sengen"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CELEBRATION -->
+<div class="celebration" id="celebration">
+  <div class="celebration-emoji" id="cel-emoji">🌸</div>
+  <div class="celebration-title" id="cel-title">保存できました！</div>
+  <div class="celebration-sub" id="cel-sub">今日もよく書けました</div>
+  <button class="celebration-btn" onclick="closeCelebration()">ありがとう 🌷</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+let diaries = JSON.parse(localStorage.getItem('4line-diaries') || '{}');
+let streak = parseInt(localStorage.getItem('4line-streak') || '0');
+let lastDate = localStorage.getItem('4line-lastdate') || '';
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatDate(key, style = 'long') {
+  const [y, m, d] = key.split('-');
+  if (style === 'short') return `${m}/${d}`;
+  const days = ['日','月','火','水','木','金','土'];
+  const date = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
+  return `${parseInt(y)}年${parseInt(m)}月${parseInt(d)}日（${days[date.getDay()]}）`;
+}
+
+// ===== SCREENS =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome() { showScreen('home'); refreshHome(); }
+function goWrite() { showScreen('write'); initWrite(); }
+
+// ===== HOME =====
+function refreshHome() {
+  const today = todayKey();
+  document.getElementById('home-date').textContent = formatDate(today);
+  document.getElementById('write-date').textContent = formatDate(today, 'short');
+
+  // streak
+  updateStreak();
+  document.getElementById('streak-num').textContent = streak;
+
+  const msgs = [
+    '今日も書こう！', 'いい調子！', 'その調子！',
+    '素晴らしい！', '継続は力なり✨', 'すごい！習慣になってきた！'
+  ];
+  const idx = Math.min(streak, msgs.length-1);
+  document.getElementById('streak-msg').textContent = msgs[idx];
+
+  // today preview
+  const entry = diaries[today];
+  const fields = ['jijitsu','hakken','kyokun','sengen'];
+  fields.forEach(f => {
+    const el = document.getElementById('prev-'+f);
+    if (entry && entry[f]) {
+      el.textContent = entry[f];
+      el.classList.remove('empty');
+    } else {
+      el.textContent = 'まだ書いていません';
+      el.classList.add('empty');
+    }
+  });
+
+  if (entry) {
+    document.getElementById('write-btn-home').textContent = '✏️ 今日の日記を編集する';
+  } else {
+    document.getElementById('write-btn-home').textContent = '✏️ 今日の日記を書く';
+  }
+
+  // history
+  const keys = Object.keys(diaries).sort((a,b) => b.localeCompare(a)).slice(0,10);
+  const list = document.getElementById('history-list');
+  if (keys.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text-light);text-align:center;padding:16px 0;">まだ記録がありません</div>';
+  } else {
+    list.innerHTML = keys.map(k => `
+      <div class="history-item" onclick="viewEntry('${k}')">
+        <div class="history-date">${formatDate(k,'short')}</div>
+        <div class="history-snippet">${diaries[k].jijitsu || '（記録あり）'}</div>
+        <div class="history-dots">
+          ${diaries[k].jijitsu ? '<div class="history-dot dot-1"></div>' : ''}
+          ${diaries[k].hakken ? '<div class="history-dot dot-2"></div>' : ''}
+          ${diaries[k].kyokun ? '<div class="history-dot dot-3"></div>' : ''}
+          ${diaries[k].sengen ? '<div class="history-dot dot-4"></div>' : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateStreak() {
+  const today = todayKey();
+  if (lastDate === today) return; // already counted today
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+
+  if (diaries[today]) {
+    if (lastDate === yKey || lastDate === '') {
+      streak++;
+    } else if (lastDate !== today) {
+      streak = 1;
+    }
+    lastDate = today;
+    localStorage.setItem('4line-streak', streak);
+    localStorage.setItem('4line-lastdate', lastDate);
+  }
+}
+
+// ===== WRITE =====
+function initWrite() {
+  const today = todayKey();
+  const entry = diaries[today] || {};
+  document.getElementById('input-jijitsu').value = entry.jijitsu || '';
+  document.getElementById('input-hakken').value = entry.hakken || '';
+  document.getElementById('input-kyokun').value = entry.kyokun || '';
+  document.getElementById('input-sengen').value = entry.sengen || '';
+  ['jijitsu','hakken','kyokun','sengen'].forEach(f => {
+    updateChar(document.getElementById('input-'+f), 'count-'+f, 20);
+  });
+}
+
+function toggleHint(id, btn) {
+  const hint = document.getElementById(id);
+  hint.classList.toggle('visible');
+  btn.textContent = hint.classList.contains('visible') ? '×' : '?';
+}
+
+function updateChar(el, countId, max) {
+  const len = el.value.length;
+  const c = document.getElementById(countId);
+  c.textContent = `${len} / ${max}字`;
+  c.classList.toggle('over', len > max);
+}
+
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzcOyRxBNaevWtOZksZlq9nfoq256q4_ESiksDjNoJ-IPysTImW72NQh7aEdew2XO5Y_w/exec';
+
+async function saveDiary() {
+  const jijitsu = document.getElementById('input-jijitsu').value.trim();
+  const hakken = document.getElementById('input-hakken').value.trim();
+  const kyokun = document.getElementById('input-kyokun').value.trim();
+  const sengen = document.getElementById('input-sengen').value.trim();
+
+  if (!jijitsu && !hakken && !kyokun && !sengen) {
+    showToast('何か書いてから保存してね 📝');
+    return;
+  }
+
+  const today = todayKey();
+  const entry = { jijitsu, hakken, kyokun, sengen, savedAt: new Date().toISOString() };
+
+  // ① まずlocalStorageに保存（オフラインでも安全）
+  diaries[today] = entry;
+  localStorage.setItem('4line-diaries', JSON.stringify(diaries));
+
+  // streak更新
+  lastDate = today;
+  const allKeys = Object.keys(diaries);
+  streak = computeStreak(allKeys);
+  localStorage.setItem('4line-streak', streak);
+  localStorage.setItem('4line-lastdate', lastDate);
+
+  // ② Googleスプレッドシートにも送信
+  const btn = document.querySelector('.save-btn');
+  btn.textContent = '☁️ Googleに保存中…';
+  btn.disabled = true;
+
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date: today, jijitsu, hakken, kyokun, sengen })
+    });
+    // no-corsのためレスポンス確認不可だが送信は成功とみなす
+    showCelebration(streak, true);
+  } catch (e) {
+    // オフライン時はキューに積んで後で送信
+    const queue = JSON.parse(localStorage.getItem('4line-queue') || '[]');
+    queue.push({ date: today, jijitsu, hakken, kyokun, sengen });
+    localStorage.setItem('4line-queue', JSON.stringify(queue));
+    showCelebration(streak, false);
+  } finally {
+    btn.textContent = '✨ 今日の日記を保存する';
+    btn.disabled = false;
+  }
+}
+
+// オフライン時に積んだキューを送信
+async function flushQueue() {
+  const queue = JSON.parse(localStorage.getItem('4line-queue') || '[]');
+  if (queue.length === 0) return;
+  const remaining = [];
+  for (const item of queue) {
+    try {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+    } catch {
+      remaining.push(item);
+    }
+  }
+  localStorage.setItem('4line-queue', JSON.stringify(remaining));
+  if (remaining.length < queue.length) {
+    showToast(`☁️ ${queue.length - remaining.length}件をGoogleに同期しました`);
+  }
+}
+
+function computeStreak(keys) {
+  if (keys.length === 0) return 0;
+  const sorted = keys.sort((a,b) => b.localeCompare(a));
+  let count = 0;
+  let current = new Date();
+  for (const key of sorted) {
+    const d = new Date(key+'T00:00:00');
+    const diff = Math.round((current - d) / 86400000);
+    if (diff <= 1) { count++; current = d; }
+    else break;
+  }
+  return count;
+}
+
+// ===== VIEW =====
+function viewEntry(key) {
+  const entry = diaries[key];
+  if (!entry) return;
+  document.getElementById('view-date-title').textContent = formatDate(key, 'short');
+  document.getElementById('view-jijitsu').textContent = entry.jijitsu || '（未記入）';
+  document.getElementById('view-hakken').textContent = entry.hakken || '（未記入）';
+  document.getElementById('view-kyokun').textContent = entry.kyokun || '（未記入）';
+  document.getElementById('view-sengen').textContent = entry.sengen || '（未記入）';
+  showScreen('view');
+}
+
+// ===== CELEBRATION =====
+const celebrationData = [
+  { emoji: '🌸', title: '書けました！', sub: '今日も一歩前へ' },
+  { emoji: '✨', title: '2日連続！', sub: '続けることが力になる' },
+  { emoji: '🌟', title: '3日連続！', sub: 'いいリズムができてきた' },
+  { emoji: '🎉', title: '一週間！', sub: '素晴らしい習慣の始まり' },
+  { emoji: '🏆', title: 'すごい！', sub: '立派な継続力です' },
+];
+
+function showCelebration(s, synced = true) {
+  const data = celebrationData[s <= 1 ? 0 : s <= 2 ? 1 : s <= 3 ? 2 : s <= 7 ? 3 : 4];
+  document.getElementById('cel-emoji').textContent = data.emoji;
+  document.getElementById('cel-title').textContent = s > 1 ? `${s}日連続達成！` : data.title;
+  document.getElementById('cel-sub').textContent = synced
+    ? data.sub + '　☁️ Googleに保存済み'
+    : data.sub + '　📱 端末に保存（後でGoogle同期）';
+  document.getElementById('celebration').classList.add('show');
+}
+
+function closeCelebration() {
+  document.getElementById('celebration').classList.remove('show');
+  goHome();
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ===== INIT =====
+refreshHome();
+// オンライン復帰時にキューを送信
+window.addEventListener('online', flushQueue);
+flushQueue();
+</script>
+</body>
+</html>
